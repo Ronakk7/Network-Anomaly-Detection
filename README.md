@@ -42,6 +42,15 @@ These models work without labeled data and learn normal patterns to detect outli
 - Elliptic Envelope
 
 ---
+## 📦 Dataset Used
+
+This project utilizes the **NSL-KDD Intrusion Detection Dataset** for building and evaluating network anomaly detection models.
+
+- 🔗 [View on Kaggle](https://www.kaggle.com/datasets/programmer3/nsl-kdd-intrusion-detection-dataset)
+- 📄 Includes: KDDTrain+, KDDTest+, and feature descriptions
+- 📁 Downloaded file: `archive.zip` (~88 MB)
+
+---
 
 ## 📈 Visualizations
 
