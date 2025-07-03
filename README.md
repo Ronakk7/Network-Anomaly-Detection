@@ -39,7 +39,6 @@ These models work without labeled data and learn normal patterns to detect outli
 - Isolation Forest
 - One-Class SVM
 - Local Outlier Factor (LOF)
-- Elliptic Envelope
 
 ---
 ## 📦 Dataset Used
