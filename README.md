@@ -69,3 +69,35 @@ A sleek **Streamlit-based UI** is included for:
 ### ⚙️ Backend (Model Training)
 ```bash
 python autoencoder_train.py
+
+💡 Frontend (Streamlit App)
+streamlit run app.py
+🧰 Technologies Used
+Python (Data processing + model training)
+
+Libraries:
+
+Pandas, NumPy, Scikit-learn
+
+TensorFlow / Keras
+
+Matplotlib, Seaborn
+
+Frontend:
+
+Streamlit (UI interface)
+
+✅ Future Improvements
+🔁 Add LSTM-based anomaly detection for time-series data
+
+📡 Integrate real-time packet monitoring
+
+🌐 Deploy as a full-stack web app with backend APIs
+
+🧑‍💻 Author
+Ronak Kumar
+B.Tech CSE, UPES
+GitHub | LinkedIn
+
+
+
