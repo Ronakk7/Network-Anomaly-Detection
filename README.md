@@ -1,103 +1,184 @@
-# 🔍 Anomaly Detection in Neural Networks
+# 🧠 Anomaly Detection in Neural Networks
 
-This project demonstrates how **Autoencoders**, a type of neural network, can be used for **Anomaly Detection** on network intrusion data. The model is trained using the **KDD Cup '99** dataset, leveraging both **unsupervised** and **supervised** learning techniques. A user-friendly **Streamlit frontend** is integrated to allow real-time anomaly detection from uploaded data.
-
----
-
-## 📌 Features
-
-- 🧠 Autoencoder-based **Unsupervised Anomaly Detection**
-- 📊 Comparative visualizations with:
-  - Isolation Forest
-  - One-Class SVM
-- 📉 Dimensionality reduction with **PCA for 2D visualization**
-- 🌐 **Streamlit frontend** for real-time anomaly prediction
-- 🔁 **Modular and scalable** codebase for easy experimentation
+A comprehensive machine learning project focusing on **anomaly detection** using both supervised and unsupervised learning techniques. This project includes model training, evaluation, visual comparisons, and a fully functional **frontend interface** using **Streamlit** for real-time anomaly detection.
 
 ---
 
-## 🧠 Learning Paradigms Used
+## 🚀 Project Overview
 
-### 🔹 Supervised Learning
-- Used for performance evaluation using `is_attack` labels.
-- Metrics: Accuracy, Precision, Recall, F1-score.
-
-### 🔹 Unsupervised Learning
-- **Primary method** for anomaly detection.
-- Autoencoders learn to reconstruct normal data → High reconstruction error = anomaly.
-- Additional unsupervised methods:
-  - Isolation Forest
-  - One-Class SVM
+This project aims to identify anomalous behavior in a dataset by leveraging machine learning algorithms. It helps uncover patterns that deviate significantly from the norm, often indicating faults, frauds, or rare events.
 
 ---
 
-## 🖥️ Frontend Integration
+## 🛠️ Features
 
-A sleek **Streamlit-based UI** is included for:
-
-- 📁 Uploading datasets
-- 🚀 Triggering predictions
-- 📊 Viewing results with interactive visual indicators
-
-### 🔗 How It Works:
-
-1. The frontend sends data to the backend via HTTP requests.
-2. Backend processes data using the trained autoencoder model.
-3. Results are returned and displayed visually with anomaly markers.
+- 📊 Model comparison across different ML algorithms
+- 📉 Visualization of training and testing accuracies
+- 🔍 Support for both **supervised** and **unsupervised** anomaly detection techniques
+- 🌐 **Interactive frontend** built using **Streamlit** for real-time predictions
+- 🔗 Seamless backend integration between the trained model and frontend UI
 
 ---
 
-## 📂 Dataset
+## 🧪 Algorithms Implemented
 
-**Source:** [KDD Cup 1999 Dataset](http://kdd.ics.uci.edu/databases/kddcup99/kddcup99.html)
+### ✅ Supervised Learning
 
-- Subset used: `kddcup.data_10_percent_corrected`
-- 41 Features + 1 Label (`normal` or `attack`)
+These models are trained with labeled data (normal vs anomaly):
+
+- Logistic Regression
+- Random Forest
+- Decision Tree
+- XGBoost Classifier
+- LightGBM Classifier
+
+### 🧠 Unsupervised Learning
+
+These models work without labeled data and learn normal patterns to detect outliers:
+
+- Isolation Forest
+- One-Class SVM
+- Local Outlier Factor (LOF)
+- Elliptic Envelope
 
 ---
 
-## 📊 Visualizations
+## 📈 Visualizations
 
-- PCA 2D scatter plots (colored by anomaly class)
-- Comparison graphs: Autoencoder vs Isolation Forest vs One-Class SVM
-- Histogram of reconstruction error distributions
+The notebook includes:
+
+- Confusion matrices for each model
+- Accuracy comparison bar plots
+- ROC curves and AUC scores
+- Training vs testing performance graphs
+
+These help in better understanding model performance.
 
 ---
 
-## 🚀 How to Run the Project
+## 🌍 Streamlit Frontend
 
-### ⚙️ Backend (Model Training)
+An **intuitive and user-friendly web interface** has been created using [Streamlit](https://streamlit.io/):
+
+- Upload or input data
+- Click "Detect Anomaly"
+- Instantly view prediction results
+
+> ⚙️ Streamlit sends data to the backend, where the best-performing trained model processes it and returns whether the input is **normal** or an **anomaly**.
+
+---
+
+## 💡 Technologies Used
+
+| Category         | Tools/Technologies                             |
+|------------------|------------------------------------------------|
+| Language         | Python                                         |
+| Data Handling    | Pandas, NumPy                                  |
+| Visualization    | Matplotlib, Seaborn, Plotly                    |
+| Machine Learning | scikit-learn, XGBoost, LightGBM                |
+| Frontend         | Streamlit                                      |
+| Others           | joblib (for model saving), pickle              |
+
+---
+
+## 📂 Project Structure
+
+```
+📦 Anomaly-Detection-NN
+├── 📁 models/                  # Saved trained models
+├── 📁 streamlit_app/           # Streamlit frontend code
+├── 📊 results/                 # Visual outputs and reports
+├── 📜 anomaly_detection.ipynb # Main Jupyter Notebook
+├── 📄 README.md                # Project documentation
+└── requirements.txt           # Python dependencies
+```
+
+---
+
+## 📦 Installation & Running Locally
+
+### 1. Clone the repo
 ```bash
-python autoencoder_train.py
+git clone https://github.com/your-username/anomaly-detection-nn.git
+cd anomaly-detection-nn
+```
 
-💡 Frontend (Streamlit App)
-streamlit run app.py
-🧰 Technologies Used
-Python (Data processing + model training)
+### 2. Install dependencies
+```bash
+pip install -r requirements.txt
+```
 
-Libraries:
+### 3. Run the Streamlit frontend
+```bash
+streamlit run streamlit_app/app.py
+```
 
-Pandas, NumPy, Scikit-learn
+---
 
-TensorFlow / Keras
+## 🧠 What is Anomaly Detection?
 
-Matplotlib, Seaborn
+**Anomaly Detection** is the process of identifying rare items, events, or observations which raise suspicions by differing significantly from the majority of the data.
 
-Frontend:
+Applications include:
 
-Streamlit (UI interface)
+- Fraud detection in banking
+- Network intrusion detection
+- Industrial equipment fault detection
+- Health monitoring systems
 
-✅ Future Improvements
-🔁 Add LSTM-based anomaly detection for time-series data
+---
 
-📡 Integrate real-time packet monitoring
+## 📚 Machine Learning Theory
 
-🌐 Deploy as a full-stack web app with backend APIs
+### Supervised Learning 🔎
 
-🧑‍💻 Author
-Ronak Kumar
-B.Tech CSE, UPES
-GitHub | LinkedIn
+In supervised learning, models learn from labeled data (where anomalies are pre-identified). It includes classification models such as:
+
+- **Logistic Regression**
+- **Random Forests**
+- **XGBoost**
+
+### Unsupervised Learning 🔐
+
+In unsupervised learning, models do not use labeled outputs. They detect patterns and spot outliers. This is useful when anomalies are **rare or unknown**. It includes:
+
+- **Isolation Forest**: Splits data points recursively to isolate anomalies.
+- **One-Class SVM**: Separates the data from the origin in a high-dimensional space.
+- **LOF**: Measures local deviation of density from neighbors.
+- **Elliptic Envelope**: Assumes data is Gaussian and fits an ellipse to it.
+
+---
+
+## ✨ Screenshots
+
+<img src="results/accuracy_comparison.png" width="600"/>
+<img src="results/confusion_matrix_xgboost.png" width="600"/>
+<img src="streamlit_app/streamlit_ui.png" width="600"/>
+
+---
+
+## ✍️ Author
+
+**Ronak**, BTech CSE @ UPES  
+📧 Email: [ronakkumar3214@gmail.com](mailto:ronakkumar3214@gmail.com)  
+🔗 LinkedIn: [Ronak Kumar](https://www.linkedin.com/in/ronak-kumar-9604b6256/)
+
+---
 
 
+## 📝 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🤝 Contributions
+
+Contributions, issues, and feature requests are welcome!
+
+---
+
+## ⭐ If you found this helpful
+
+Please consider giving a ⭐ to this repository. It helps me grow and share more useful projects!
 
