@@ -1,106 +1,71 @@
-🔍 Anomaly Detection in Neural Networks
-This project demonstrates how Autoencoders, a type of neural network, can be used for Anomaly Detection in network intrusion data. The model is trained using the KDD Cup '99 dataset, and includes both unsupervised and supervised learning techniques. A user-friendly frontend is built using Streamlit, allowing users to easily interact with the model and detect anomalies from uploaded data in real-time.
+# 🔍 Anomaly Detection in Neural Networks
 
-📌 Features
-Autoencoder-based Unsupervised Anomaly Detection
+This project demonstrates how **Autoencoders**, a type of neural network, can be used for **Anomaly Detection** on network intrusion data. The model is trained using the **KDD Cup '99** dataset, leveraging both **unsupervised** and **supervised** learning techniques. A user-friendly **Streamlit frontend** is integrated to allow real-time anomaly detection from uploaded data.
 
-Comparative visualizations with:
+---
 
-Isolation Forest
+## 📌 Features
 
-One-Class SVM
+- 🧠 Autoencoder-based **Unsupervised Anomaly Detection**
+- 📊 Comparative visualizations with:
+  - Isolation Forest
+  - One-Class SVM
+- 📉 Dimensionality reduction with **PCA for 2D visualization**
+- 🌐 **Streamlit frontend** for real-time anomaly prediction
+- 🔁 **Modular and scalable** codebase for easy experimentation
 
-Dimensionality reduction with PCA for 2D visualization
+---
 
-Streamlit frontend for real-time anomaly prediction
+## 🧠 Learning Paradigms Used
 
-Modular and scalable codebase
+### 🔹 Supervised Learning
+- Used for performance evaluation using `is_attack` labels.
+- Metrics: Accuracy, Precision, Recall, F1-score.
 
-🧠 Learning Paradigms Used
-🔹 Supervised Learning
-Utilized for evaluating performance (using is_attack labels in the dataset).
+### 🔹 Unsupervised Learning
+- **Primary method** for anomaly detection.
+- Autoencoders learn to reconstruct normal data → High reconstruction error = anomaly.
+- Additional unsupervised methods:
+  - Isolation Forest
+  - One-Class SVM
 
-Metrics like accuracy, precision, recall, and F1-score help compare models.
+---
 
-🔹 Unsupervised Learning
-Primary method used for anomaly detection.
+## 🖥️ Frontend Integration
 
-Autoencoders learn to reconstruct normal data; high reconstruction error indicates anomalies.
+A sleek **Streamlit-based UI** is included for:
 
-Also implemented: Isolation Forest & One-Class SVM (pure unsupervised techniques).
+- 📁 Uploading datasets
+- 🚀 Triggering predictions
+- 📊 Viewing results with interactive visual indicators
 
-🖥️ Frontend Integration
-A sleek Streamlit-based UI is included for:
+### 🔗 How It Works:
 
-Uploading datasets
+1. The frontend sends data to the backend via HTTP requests.
+2. Backend processes data using the trained autoencoder model.
+3. Results are returned and displayed visually with anomaly markers.
 
-Triggering predictions
+---
 
-Viewing anomaly detection results visually
+## 📂 Dataset
 
-📡 How It Works:
+**Source:** [KDD Cup 1999 Dataset](http://kdd.ics.uci.edu/databases/kddcup99/kddcup99.html)
 
-The frontend sends data to the backend via HTTP requests.
+- Subset used: `kddcup.data_10_percent_corrected`
+- 41 Features + 1 Label (`normal` or `attack`)
 
-Backend processes data using the trained autoencoder.
+---
 
-Results are returned and displayed with visual indicators.
+## 📊 Visualizations
 
-📂 Dataset
-Source: KDD Cup 1999 Dataset
+- PCA 2D scatter plots (colored by anomaly class)
+- Comparison graphs: Autoencoder vs Isolation Forest vs One-Class SVM
+- Histogram of reconstruction error distributions
 
-Used the kddcup.data_10_percent_corrected subset
+---
 
-41 features + label (normal or attack)
+## 🚀 How to Run the Project
 
-📊 Visualizations Included
-PCA 2D Scatter plots (colored by anomaly detection)
-
-Comparison of Autoencoder vs Isolation Forest vs One-Class SVM
-
-Reconstruction error distributions
-
-🚀 How to Run the Project
-⚙️ Backend (Autoencoder Training)
-bash
-Copy
-Edit
+### ⚙️ Backend (Model Training)
+```bash
 python autoencoder_train.py
-💡 Frontend (Streamlit App)
-bash
-Copy
-Edit
-streamlit run app.py
-📁 Folder Structure
-python
-Copy
-Edit
-📦 anomaly-detection-neural-network
-├── archive.zip
-├── autoencoder_train.py
-├── models/
-├── app.py
-├── utils/
-├── README.md
-🧰 Technologies Used
-Python
-
-Pandas, NumPy, Scikit-learn
-
-TensorFlow / Keras
-
-Matplotlib, Seaborn
-
-Streamlit (for frontend)
-
-✅ Future Improvements
-Add LSTM-based anomaly detection for time-series
-
-Extend to real-time network packet monitoring
-
-Deploy as a full-stack web app with backend API
-
-🧑‍💻 Author
-Ronak Kumar
-Computer Science Engineering (CSE), UPES
-GitHub | LinkedIn
