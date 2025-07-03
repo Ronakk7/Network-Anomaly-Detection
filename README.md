@@ -149,14 +149,6 @@ In unsupervised learning, models do not use labeled outputs. They detect pattern
 
 ---
 
-## ✨ Screenshots
-
-<img src="results/accuracy_comparison.png" width="600"/>
-<img src="results/confusion_matrix_xgboost.png" width="600"/>
-<img src="streamlit_app/streamlit_ui.png" width="600"/>
-
----
-
 ## ✍️ Author
 
 **Ronak**, BTech CSE @ UPES  
@@ -165,12 +157,6 @@ In unsupervised learning, models do not use labeled outputs. They detect pattern
 
 ---
 
-
-## 📝 License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
 
 ## 🤝 Contributions
 
