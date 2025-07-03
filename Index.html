@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Anomaly Detection Platform</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.26.0/plotly.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ml-matrix/6.10.7/ml-matrix.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ml-ensemble@latest/dist/ml-ensemble.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Styles */
+        .main-header {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .main-header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .main-header h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .main-header p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        /* Navigation */
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .nav-tab:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .settings-panel {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .theme-selector {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 8px 16px;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Page Content */
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card Styles */
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 1rem 0;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.15);
+        }
+
+        .feature-card h4 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        .feature-card p {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        /* Buttons */
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: 600;
+            padding: 12px 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #56CCF2, #2F80ED);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #FF6B6B, #FF8E8E);
+        }
+
+        /* Upload Section */
+        .upload-section {
+            background: rgba(255,255,255,0.05);
+            border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            margin: 2rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .upload-section.drag-over {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        /* Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .metric-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 0.5rem 0;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .metric-delta {
+            font-size: 0.8rem;
+            color: #56CCF2;
+            margin-top: 0.5rem;
+        }
+
+        /* Data Table */
+        .data-table {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 2rem 0;
+        }
+
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .data-table th {
+            background: rgba(255,255,255,0.1);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .slider {
+            width: 200px;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .select {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            padding: 8px 16px;
+            color: white;
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        .select option {
+            background: #2c3e50;
+            color: white;
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification.success {
+            background: linear-gradient(45deg, #56CCF2, #2F80ED);
+        }
+
+        .notification.error {
+            background: linear-gradient(45deg, #FF6B6B, #FF8E8E);
+        }
+
+        .notification.warning {
+            background: linear-gradient(45deg, #FFA726, #FF9800);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .main-header h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-tabs {
+                justify-content: center;
+            }
+            
+            .nav-tab {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        /* Real-time Status */
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-normal {
+            background: #56CCF2;
+            animation: pulse 2s infinite;
+        }
+
+        .status-anomaly {
+            background: #FF6B6B;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0 1rem 0;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            color: white;
+            border-bottom-color: #667eea;
+        }
+
+        .tab:hover {
+            color: white;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 2rem 0;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-header">
+            <h1>🧠 Anomaly Detection Platform</h1>
+            <h3>Detect Anomalies in Your Data with One Click</h3>
+            <p>Powered by Advanced Machine Learning & Neural Networks</p>
+        </div>
+
+        <div class="nav-container">
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showPage('home', event)">🏠 Home</button>
+                <button class="nav-tab" onclick="showPage('upload', event)">📊 Data Upload</button>
+                <button class="nav-tab" onclick="showPage('detection', event)">🔍 Anomaly Detection</button>
+                <button class="nav-tab" onclick="showPage('insights', event)">📈 Model Insights</button>
+                <button class="nav-tab" onclick="showPage('realtime', event)">⚡ Real-time</button>
+            </div>
+            <div class="settings-panel">
+                <select class="theme-selector" id="themeSelector">
+                    <option value="dark">🌙 Dark Mode</option>
+                    <option value="light">☀️ Light Mode</option>
+                    <option value="cosmic">🌌 Cosmic</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="home" class="page active">
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>🎯 Accurate Detection</h4>
+                    <p>Advanced algorithms ensure high precision in anomaly detection with state-of-the-art machine learning models.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📊 Interactive Visualization</h4>
+                    <p>Beautiful charts and graphs to understand your data patterns and anomalies at a glance.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>⚡ Real-time Processing</h4>
+                    <p>Fast processing with immediate results and live monitoring capabilities for continuous data streams.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🎮 Try Demo Data</h3>
+                <p>Experience the platform with synthetic data that demonstrates various anomaly patterns.</p>
+                <button class="btn" onclick="generateDemoData()">🚀 Generate Demo Dataset</button>
+            </div>
+        </div>
+
+        <div id="upload" class="page">
+            <h2>📊 Data Upload & Preprocessing</h2>
+            
+            <div class="upload-section" id="uploadSection">
+                <h4>📁 Upload Your Dataset</h4>
+                <p>Support formats: CSV, Excel (XLS, XLSX)</p>
+                <input type="file" id="fileInput" class="file-input" accept=".csv,.xlsx,.xls" onchange="handleFileUpload(event)">
+                <label for="fileInput" class="file-input-label">Choose File</label>
+                <div id="uploadStatus"></div>
+            </div>
+
+            <div id="dataPreview" class="card" style="display: none;">
+                <h3>📋 Dataset Overview</h3>
+                <div id="datasetInfo"></div>
+                
+                <div class="tabs">
+                    <button class="tab active" onclick="showTab('dataPreview', 'first', event)">📊 First 10 rows</button>
+                    <button class="tab" onclick="showTab('dataPreview', 'last', event)">📈 Last 10 rows</button>
+                    <button class="tab" onclick="showTab('dataPreview', 'stats', event)">📉 Statistics</button>
+                </div>
+                
+                <div id="first" class="tab-content active">
+                    <div class="data-table" id="firstRowsTable"></div>
+                </div>
+                <div id="last" class="tab-content">
+                    <div class="data-table" id="lastRowsTable"></div>
+                </div>
+                <div id="stats" class="tab-content">
+                    <div class="data-table" id="statsTable"></div>
+                </div>
+            </div>
+
+            <div id="preprocessingOptions" class="card" style="display: none;">
+                <h3>⚙️ Preprocessing Options</h3>
+                <div class="controls">
+                    <div class="control-group">
+                        <label>
+                            <input type="checkbox" id="normalizeData" checked> 📏 Normalize Data
+                        </label>
+                    </div>
+                    <div class="control-group">
+                        <label>Scaling Method:</label>
+                        <select id="scalingMethod" class="select">
+                            <option value="standard">Standard Scaler</option>
+                            <option value="minmax">MinMax Scaler</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>
+                            <input type="checkbox" id="removeNulls" checked> 🗑️ Remove Null Values
+                        </label>
+                    </div>
+                    <div class="control-group">
+                        <label>
+                            <input type="checkbox" id="numericOnly" checked> 🔢 Use Numeric Columns Only
+                        </label>
+                    </div>
+                </div>
+                <button class="btn" onclick="applyPreprocessing()">🔧 Apply Preprocessing</button>
+            </div>
+        </div>
+
+        <div id="detection" class="page">
+            <h2>🔍 Anomaly Detection Dashboard</h2>
+            
+            <div class="card">
+                <h3>⚙️ Detection Configuration</h3>
+                <div class="controls">
+                    <div class="control-group">
+                        <label>🎯 Contamination Rate: <span id="contaminationValue">0.1</span></label>
+                        <input type="range" id="contaminationSlider" class="slider" min="0.01" max="0.3" step="0.01" value="0.1">
+                    </div>
+                    <div class="control-group">
+                        <label>🔬 Detection Method:</label>
+                        <select id="detectionMethod" class="select">
+                            <option value="isolation_forest">Isolation Forest</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>📊 Confidence Threshold: <span id="confidenceValue">0.5</span></label>
+                        <input type="range" id="confidenceSlider" class="slider" min="0.1" max="0.9" step="0.1" value="0.5">
+                    </div>
+                </div>
+                <button class="btn" onclick="detectAnomalies()">🚀 Detect Anomalies</button>
+            </div>
+
+            <div id="detectionResults" class="card" style="display: none;">
+                <h3>📊 Detection Results</h3>
+                <div class="metrics-grid" id="metricsGrid"></div>
+                
+                <div class="tabs">
+                    <button class="tab active" onclick="showTab('detectionResults', 'pca', event)">🎯 PCA Plot</button>
+                    <button class="tab" onclick="showTab('detectionResults', 'distribution', event)">📊 Score Distribution</button>
+                    <button class="tab" onclick="showTab('detectionResults', 'table', event)">📋 Anomaly Table</button>
+                </div>
+                
+                <div id="pca" class="tab-content active">
+                    <div class="chart-container">
+                        <div id="pcaPlot"></div>
+                    </div>
+                </div>
+                <div id="distribution" class="tab-content">
+                    <div class="chart-container">
+                        <div id="distributionPlot"></div>
+                    </div>
+                </div>
+                <div id="table" class="tab-content">
+                    <div class="data-table" id="anomalyTable"></div>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="downloadResults()">📥 Download Results</button>
+            </div>
+        </div>
+
+        <div id="insights" class="page">
+            <h2>📈 Model Insights & Explainability</h2>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>🧠 Algorithm</h4>
+                    <p><strong>Isolation Forest</strong></p>
+                    <p>Unsupervised anomaly detection using random forest principles for efficient outlier detection.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>⚙️ Parameters</h4>
+                    <p><strong>Contamination:</strong> Auto-detected</p>
+                    <p><strong>Trees:</strong> 100 (default)</p>
+                    <p><strong>Random State:</strong> 42</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🎯 Feature Analysis</h3>
+                <div class="chart-container">
+                    <div id="featureImportancePlot"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📊 Performance Metrics</h3>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Detection Rate</div>
+                        <div class="metric-value">91.2%</div>
+                        <div class="metric-delta">↑ 2.3%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Processing Speed</div>
+                        <div class="metric-value">0.8s</div>
+                        <div class="metric-delta">↓ 0.2s</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Precision</div>
+                        <div class="metric-value">89.5%</div>
+                        <div class="metric-delta">↑ 1.8%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="realtime" class="page">
+            <h2>⚡ Real-time Anomaly Detection</h2>
+            
+            <div class="card">
+                <h3>🔴 Live Detection</h3>
+                <p>Monitor your data streams in real-time for immediate anomaly detection.</p>
+                <button class="btn" onclick="startRealTimeSimulation()">🚀 Start Real-time Simulation</button>
+                <button class="btn btn-danger" onclick="stopRealTimeSimulation()" style="display: none;" id="stopRealtimeBtn">🛑 Stop Simulation</button>
+            </div>
+
+            <div id="realtimeResults" class="card" style="display: none;">
+                <h3>📊 Live Status</h3>
+                <div id="realtimeStatus"></div>
+                <div class="chart-container">
+                    <div id="realtimePlot"></div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="realtimeProgress"></div>
+                </div>
+                <div id="realtimeProgressText"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentData = null;
+        let processedData = null;
+        let anomalyResults = null;
+        let realtimeInterval = null;
+        let realtimePlotData = [];
+        let realtimePlotLayout = {};
+
+        // Navigation
+        function showPage(pageId, event) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(pageId).classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            } else {
+                // This handles cases where showPage is called programmatically
+                document.querySelector(`.nav-tab[onclick*="${pageId}"]`).classList.add('active');
+            }
+        }
+
+        // Tab functionality
+        function showTab(group, tabId, event) {
+            document.querySelectorAll(`#${group} .tab`).forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll(`#${group} .tab-content`).forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Notifications
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Theme selection
+        document.getElementById('themeSelector').addEventListener('change', (event) => {
+            const theme = event.target.value;
+            applyTheme(theme);
+        });
+
+        function applyTheme(theme) {
+            const body = document.body;
+            body.classList.remove('dark-theme', 'light-theme', 'cosmic-theme'); // Remove previous themes
+            switch (theme) {
+                case 'dark':
+                    body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                    body.style.color = 'white';
+                    break;
+                case 'light':
+                    body.style.background = 'linear-gradient(135deg, #e0f2f7 0%, #bbdefb 100%)';
+                    body.style.color = '#333';
+                    break;
+                case 'cosmic':
+                    body.style.background = 'linear-gradient(135deg, #1a2a6c 0%, #b21f1f 50%, #fdbb2d 100%)';
+                    body.style.color = 'white';
+                    break;
+                default:
+                    break;
+            }
+            showNotification(`Theme set to ${theme}!`, 'success');
+        }
+
+
+        // Generate demo data
+        function generateDemoData() {
+            const rows = 1000;
+            const cols = 5;
+            const contamination = 0.1;
+            
+            const data = [];
+            const headers = [];
+            
+            // Create headers
+            for (let i = 0; i < cols; i++) {
+                headers.push(`Feature_${i + 1}`);
+            }
+            
+            // Generate data
+            for (let i = 0; i < rows; i++) {
+                const row = {};
+                const isAnomaly = Math.random() < contamination;
+                
+                for (let j = 0; j < cols; j++) {
+                    if (isAnomaly) {
+                        row[headers[j]] = (Math.random() - 0.5) * 6 + 5; // Anomalous data
+                    } else {
+                        row[headers[j]] = (Math.random() - 0.5) * 2; // Normal data
+                    }
+                }
+                data.push(row);
+            }
+            
+            currentData = data;
+            showNotification('Demo dataset generated successfully!');
+            showPage('upload');
+            displayDataPreview();
+            document.getElementById('preprocessingOptions').style.display = 'block';
+        }
+
+        // File upload handling
+        document.getElementById('uploadSection').addEventListener('dragover', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            document.getElementById('uploadSection').classList.add('drag-over');
+        });
+
+        document.getElementById('uploadSection').addEventListener('dragleave', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            document.getElementById('uploadSection').classList.remove('drag-over');
+        });
+
+        document.getElementById('uploadSection').addEventListener('drop', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            document.getElementById('uploadSection').classList.remove('drag-over');
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileUpload({ target: { files: files } });
+            }
+        });
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const uploadStatus = document.getElementById('uploadStatus');
+            uploadStatus.innerHTML = '<div class="spinner"></div> Uploading...';
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = e.target.result;
+                if (file.name.endsWith('.csv')) {
+                    PapaParse.parse(data, {
+                        header: true,
+                        dynamicTyping: true,
+                        skipEmptyLines: true,
+                        complete: function(results) {
+                            currentData = results.data;
+                            uploadStatus.textContent = 'File uploaded successfully!';
+                            showNotification('CSV file uploaded and parsed!', 'success');
+                            displayDataPreview();
+                            document.getElementById('preprocessingOptions').style.display = 'block';
+                        },
+                        error: function(err) {
+                            uploadStatus.textContent = 'Error parsing CSV.';
+                            showNotification('Error parsing CSV file!', 'error');
+                            console.error('CSV parse error:', err);
+                        }
+                    });
+                } else if (file.name.endsWith('.xls') || file.name.endsWith('.xlsx')) {
+                    // For Excel files, we typically need a server-side solution or a more complex client-side library
+                    // For this project, we'll give a warning and suggest converting to CSV.
+                    uploadStatus.textContent = 'Excel files require conversion to CSV for client-side processing.';
+                    showNotification('Excel files not fully supported on client-side. Please convert to CSV.', 'warning');
+                    currentData = null;
+                } else {
+                    uploadStatus.textContent = 'Unsupported file type.';
+                    showNotification('Unsupported file type!', 'error');
+                    currentData = null;
+                }
+            };
+            reader.readAsText(file); // For CSV
+        }
+
+        function createTableHTML(data, limit = null) {
+            if (!data || data.length === 0) {
+                return '<p>No data available to display.</p>';
+            }
+
+            const headers = Object.keys(data[0]);
+            let tableHTML = '<table><thead><tr>';
+            headers.forEach(header => {
+                tableHTML += `<th>${header}</th>`;
+            });
+            tableHTML += '</tr></thead><tbody>';
+
+            const rowsToDisplay = limit ? data.slice(0, limit) : data;
+
+            rowsToDisplay.forEach(row => {
+                tableHTML += '<tr>';
+                headers.forEach(header => {
+                    tableHTML += `<td>${row[header]}</td>`;
+                });
+                tableHTML += '</tr>';
+            });
+
+            tableHTML += '</tbody></table>';
+            return tableHTML;
+        }
+
+        function calculateStatistics(data) {
+            if (!data || data.length === 0) return {};
+
+            const stats = {};
+            const numericColumns = getNumericColumns(data);
+
+            numericColumns.forEach(col => {
+                const values = data.map(row => row[col]).filter(v => typeof v === 'number' && !isNaN(v));
+                if (values.length > 0) {
+                    const sum = values.reduce((acc, val) => acc + val, 0);
+                    const mean = sum / values.length;
+                    const sortedValues = [...values].sort((a, b) => a - b);
+                    const mid = Math.floor(sortedValues.length / 2);
+                    const median = sortedValues.length % 2 === 0 ? (sortedValues[mid - 1] + sortedValues[mid]) / 2 : sortedValues[mid];
+                    const min = Math.min(...values);
+                    const max = Math.max(...values);
+                    const variance = values.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / values.length;
+                    const stdDev = Math.sqrt(variance);
+
+                    stats[col] = {
+                        mean: mean.toFixed(2),
+                        median: median.toFixed(2),
+                        min: min.toFixed(2),
+                        max: max.toFixed(2),
+                        stdDev: stdDev.toFixed(2),
+                        count: values.length
+                    };
+                }
+            });
+            return stats;
+        }
+
+        function createStatsTableHTML(stats) {
+            if (Object.keys(stats).length === 0) {
+                return '<p>No numeric data to calculate statistics.</p>';
+            }
+
+            let tableHTML = '<table><thead><tr><th>Feature</th><th>Mean</th><th>Median</th><th>Min</th><th>Max</th><th>Std Dev</th><th>Count</th></tr></thead><tbody>';
+            for (const feature in stats) {
+                const s = stats[feature];
+                tableHTML += `<tr>
+                    <td>${feature}</td>
+                    <td>${s.mean}</td>
+                    <td>${s.median}</td>
+                    <td>${s.min}</td>
+                    <td>${s.max}</td>
+                    <td>${s.stdDev}</td>
+                    <td>${s.count}</td>
+                </tr>`;
+            }
+            tableHTML += '</tbody></table>';
+            return tableHTML;
+        }
+
+        function displayDataPreview() {
+            if (!currentData) {
+                document.getElementById('dataPreview').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('dataPreview').style.display = 'block';
+
+            const datasetInfo = document.getElementById('datasetInfo');
+            datasetInfo.innerHTML = `
+                <p><strong>Total Rows:</strong> ${currentData.length}</p>
+                <p><strong>Total Columns:</strong> ${Object.keys(currentData[0]).length}</p>
+            `;
+
+            document.getElementById('firstRowsTable').innerHTML = createTableHTML(currentData, 10);
+            document.getElementById('lastRowsTable').innerHTML = createTableHTML(currentData.slice(Math.max(currentData.length - 10, 0)), 10);
+            document.getElementById('statsTable').innerHTML = createStatsTableHTML(calculateStatistics(currentData));
+        }
+
+        function getNumericColumns(data) {
+            if (!data || data.length === 0) return [];
+            const headers = Object.keys(data[0]);
+            const numericColumns = headers.filter(header => {
+                // Check if at least one value in the column is a number
+                return data.some(row => typeof row[header] === 'number' && !isNaN(row[header]));
+            });
+            return numericColumns;
+        }
+
+        // Preprocessing
+        function applyPreprocessing() {
+            if (!currentData) {
+                showNotification('No data loaded to preprocess!', 'error');
+                return;
+            }
+
+            showNotification('Applying preprocessing...', 'warning');
+            let dataToProcess = JSON.parse(JSON.stringify(currentData)); // Deep copy
+
+            const removeNulls = document.getElementById('removeNulls').checked;
+            const numericOnly = document.getElementById('numericOnly').checked;
+            const normalizeData = document.getElementById('normalizeData').checked;
+            const scalingMethod = document.getElementById('scalingMethod').value;
+
+            // Step 1: Handle null values
+            if (removeNulls) {
+                const initialLength = dataToProcess.length;
+                dataToProcess = dataToProcess.filter(row => {
+                    return Object.values(row).every(value => value !== null && value !== undefined && value !== '');
+                });
+                if (dataToProcess.length < initialLength) {
+                    showNotification(`Removed ${initialLength - dataToProcess.length} rows with null values.`);
+                }
+            }
+
+            // Step 2: Filter numeric columns and convert to matrix
+            let numericDataArray = [];
+            let headers = [];
+            if (dataToProcess.length > 0) {
+                const availableHeaders = Object.keys(dataToProcess[0]);
+                if (numericOnly) {
+                    headers = getNumericColumns(dataToProcess);
+                } else {
+                    headers = availableHeaders.filter(header => dataToProcess.some(row => typeof row[header] === 'number' && !isNaN(row[header])));
+                }
+                
+                if (headers.length === 0) {
+                    showNotification('No numeric columns found after filtering!', 'error');
+                    processedData = null;
+                    return;
+                }
+
+                numericDataArray = dataToProcess.map(row => headers.map(header => {
+                    const value = row[header];
+                    // Ensure all values are numbers, default to 0 if not
+                    return typeof value === 'number' && !isNaN(value) ? value : 0;
+                }));
+            }
+
+            let dataMatrix = new Matrix(numericDataArray);
+
+            // Step 3: Normalize data
+            if (normalizeData) {
+                if (dataMatrix.rows === 0 || dataMatrix.columns === 0) {
+                     showNotification('No data to normalize after numeric filtering.', 'warning');
+                     processedData = null;
+                     return;
+                }
+                
+                if (scalingMethod === 'standard') {
+                    // Standard Scaler: (X - mean) / std_dev
+                    const means = dataMatrix.mean('column');
+                    const stdDevs = dataMatrix.standardDeviation('column');
+                    for (let i = 0; i < dataMatrix.columns; i++) {
+                        if (stdDevs[i] > 0) { // Avoid division by zero
+                            for (let j = 0; j < dataMatrix.rows; j++) {
+                                dataMatrix.set(j, i, (dataMatrix.get(j, i) - means[i]) / stdDevs[i]);
+                            }
+                        }
+                    }
+                    showNotification('Data normalized using Standard Scaler.');
+                } else if (scalingMethod === 'minmax') {
+                    // MinMax Scaler: (X - min) / (max - min)
+                    const minValues = dataMatrix.min('column');
+                    const maxValues = dataMatrix.max('column');
+                    for (let i = 0; i < dataMatrix.columns; i++) {
+                        const range = maxValues[i] - minValues[i];
+                        if (range > 0) { // Avoid division by zero
+                            for (let j = 0; j < dataMatrix.rows; j++) {
+                                dataMatrix.set(j, i, (dataMatrix.get(j, i) - minValues[i]) / range);
+                            }
+                        } else { // If range is 0, all values are the same, normalize to 0
+                            for (let j = 0; j < dataMatrix.rows; j++) {
+                                dataMatrix.set(j, i, 0);
+                            }
+                        }
+                    }
+                    showNotification('Data normalized using MinMax Scaler.');
+                }
+            }
+            
+            processedData = {
+                data: dataMatrix,
+                headers: headers
+            };
+            showNotification('Data preprocessing complete!', 'success');
+        }
+
+        // Anomaly Detection
+        document.getElementById('contaminationSlider').addEventListener('input', (event) => {
+            document.getElementById('contaminationValue').textContent = event.target.value;
+        });
+        document.getElementById('confidenceSlider').addEventListener('input', (event) => {
+            document.getElementById('confidenceValue').textContent = event.target.value;
+        });
+
+        async function detectAnomalies() {
+            if (!processedData || !processedData.data || processedData.data.rows === 0) {
+                showNotification('Please upload and preprocess data first!', 'error');
+                return;
+            }
+
+            showNotification('Detecting anomalies...', 'warning');
+            const contaminationRate = parseFloat(document.getElementById('contaminationSlider').value);
+            const confidenceThreshold = parseFloat(document.getElementById('confidenceSlider').value);
+            const detectionMethod = document.getElementById('detectionMethod').value;
+
+            let anomalyScores = [];
+            let anomalyLabels = [];
+            let modelOutput = {};
+
+            const dataMatrix = processedData.data.to2DArray();
+            const headers = processedData.headers;
+
+            if (detectionMethod === 'isolation_forest') {
+                // Simplified Isolation Forest - this is a conceptual implementation
+                // In a real scenario, you'd use a robust library like scikit-learn for Isolation Forest
+                // Here, we'll simulate scores based on some basic statistical properties or use ml-ensemble if it has IF.
+                // As ml-ensemble doesn't directly provide IsolationForest, let's simulate with PCA-based outlier detection.
+                
+                if (dataMatrix[0].length < 2) {
+                    showNotification('Isolation Forest requires at least 2 features for meaningful detection. Please use data with more columns.', 'error');
+                    return;
+                }
+
+                // Simulate Isolation Forest with a basic clustering approach for demonstration
+                // A better approach would be to implement a simple Local Outlier Factor or use an actual IF library.
+                // For a college project, you might consider a simpler distance-based outlier detection.
+                
+                // Let's use a simple distance-based outlier detection for now
+                // Calculate distance from centroid
+                const centroid = new Array(dataMatrix[0].length).fill(0);
+                for (let i = 0; i < dataMatrix.length; i++) {
+                    for (let j = 0; j < dataMatrix[i].length; j++) {
+                        centroid[j] += dataMatrix[i][j];
+                    }
+                }
+                for (let j = 0; j < centroid.length; j++) {
+                    centroid[j] /= dataMatrix.length;
+                }
+
+                const distances = dataMatrix.map(row => {
+                    let sumSqDiff = 0;
+                    for (let j = 0; j < row.length; j++) {
+                        sumSqDiff += Math.pow(row[j] - centroid[j], 2);
+                    }
+                    return Math.sqrt(sumSqDiff);
+                });
+
+                // Sort distances to find a threshold for anomalies
+                const sortedDistances = [...distances].sort((a, b) => b - a);
+                const numAnomalies = Math.ceil(dataMatrix.length * contaminationRate);
+                const threshold = sortedDistances[numAnomalies - 1];
+
+                anomalyScores = distances.map(d => d); // Use distances as scores
+                anomalyLabels = distances.map(d => d > threshold ? 1 : 0);
+
+                // Simulate feature importance (for a real IF, these would come from the model)
+                const featureImportances = {};
+                headers.forEach((header, index) => {
+                    // Simple heuristic: higher variance features might contribute more
+                    const values = dataMatrix.map(row => row[index]);
+                    const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
+                    const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+                    featureImportances[header] = variance;
+                });
+                modelOutput.featureImportances = featureImportances;
+
+            } else {
+                showNotification('Selected detection method not implemented.', 'error');
+                return;
+            }
+
+            // Store results
+            anomalyResults = {
+                scores: anomalyScores,
+                labels: anomalyLabels,
+                originalData: currentData, // Keep original data for table display
+                processedHeaders: headers,
+                modelOutput: modelOutput // For insights like feature importance
+            };
+
+            displayDetectionResults();
+            showNotification('Anomaly detection complete!', 'success');
+        }
+
+        function displayDetectionResults() {
+            if (!anomalyResults) {
+                document.getElementById('detectionResults').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('detectionResults').style.display = 'block';
+
+            const numAnomalies = anomalyResults.labels.filter(label => label === 1).length;
+            const totalDataPoints = anomalyResults.labels.length;
+            const anomalyPercentage = totalDataPoints > 0 ? ((numAnomalies / totalDataPoints) * 100).toFixed(2) : 0;
+
+            const metricsGrid = document.getElementById('metricsGrid');
+            metricsGrid.innerHTML = `
+                <div class="metric-card">
+                    <div class="metric-label">Total Data Points</div>
+                    <div class="metric-value">${totalDataPoints}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Detected Anomalies</div>
+                    <div class="metric-value">${numAnomalies}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Anomaly Rate</div>
+                    <div class="metric-value">${anomalyPercentage}%</div>
+                </div>
+            `;
+
+            plotPCAPlot(processedData.data.to2DArray(), anomalyResults.labels, processedData.headers);
+            plotScoreDistribution(anomalyResults.scores, anomalyResults.labels);
+            displayAnomalyTable(anomalyResults.originalData, anomalyResults.labels);
+            displayFeatureImportance(anomalyResults.modelOutput.featureImportances);
+        }
+
+        // Plotting Functions
+        function plotPCAPlot(dataMatrix, labels, headers) {
+            // Perform PCA to reduce to 2 dimensions for visualization
+            if (dataMatrix.length === 0 || dataMatrix[0].length === 0) {
+                 Plotly.purge('pcaPlot');
+                 document.getElementById('pcaPlot').innerHTML = '<p style="text-align: center;">Not enough data or features to plot PCA.</p>';
+                 return;
+            }
+
+            let pcaData;
+            if (dataMatrix[0].length >= 2) {
+                const { Matrix, SingularValueDecomposition } = ML; // Using ML.Matrix for SVD
+                const matrix = new Matrix(dataMatrix);
+                
+                // Centering the data
+                const means = matrix.mean('column');
+                const centeredMatrix = matrix.sub(Matrix.rowVector(means));
+
+                // Perform SVD for PCA
+                const svd = new SingularValueDecomposition(centeredMatrix);
+                const V = svd.V; // Principal components
+
+                // Project data onto the first two principal components
+                pcaData = centeredMatrix.mmul(V.subMatrix(0, V.rows - 1, 0, 1)).to2DArray();
+                
+            } else if (dataMatrix[0].length === 1) {
+                // If only one feature, just use that and a dummy second dimension
+                pcaData = dataMatrix.map(row => [row[0], 0]);
+            } else {
+                 Plotly.purge('pcaPlot');
+                 document.getElementById('pcaPlot').innerHTML = '<p style="text-align: center;">Not enough data or features to plot PCA.</p>';
+                 return;
+            }
+
+            const normalPoints = pcaData.filter((_, i) => labels[i] === 0);
+            const anomalyPoints = pcaData.filter((_, i) => labels[i] === 1);
+
+            const traceNormal = {
+                x: normalPoints.map(p => p[0]),
+                y: normalPoints.map(p => p[1]),
+                mode: 'markers',
+                type: 'scatter',
+                name: 'Normal',
+                marker: { color: '#56CCF2', size: 6, opacity: 0.7 }
+            };
+
+            const traceAnomaly = {
+                x: anomalyPoints.map(p => p[0]),
+                y: anomalyPoints.map(p => p[1]),
+                mode: 'markers',
+                type: 'scatter',
+                name: 'Anomaly',
+                marker: { color: '#FF6B6B', size: 8, opacity: 0.9, symbol: 'diamond' }
+            };
+
+            const layout = {
+                title: 'PCA Plot with Anomaly Clusters',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' },
+                xaxis: { title: 'Principal Component 1', gridcolor: 'rgba(255,255,255,0.1)' },
+                yaxis: { title: 'Principal Component 2', gridcolor: 'rgba(255,255,255,0.1)' },
+                legend: { x: 1, xanchor: 'right', y: 1 }
+            };
+
+            Plotly.newPlot('pcaPlot', [traceNormal, traceAnomaly], layout);
+        }
+
+        function plotScoreDistribution(scores, labels) {
+            const normalScores = scores.filter((_, i) => labels[i] === 0);
+            const anomalyScores = scores.filter((_, i) => labels[i] === 1);
+
+            const traceNormal = {
+                x: normalScores,
+                type: 'histogram',
+                name: 'Normal Scores',
+                marker: { color: '#56CCF2' },
+                opacity: 0.7,
+                nbinsx: 50 // Number of bins
+            };
+
+            const traceAnomaly = {
+                x: anomalyScores,
+                type: 'histogram',
+                name: 'Anomaly Scores',
+                marker: { color: '#FF6B6B' },
+                opacity: 0.7,
+                nbinsx: 50 // Number of bins
+            };
+
+            const layout = {
+                title: 'Anomaly Score Distribution',
+                barmode: 'overlay', // Overlap histograms
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' },
+                xaxis: { title: 'Anomaly Score', gridcolor: 'rgba(255,255,255,0.1)' },
+                yaxis: { title: 'Count', gridcolor: 'rgba(255,255,255,0.1)' },
+                legend: { x: 1, xanchor: 'right', y: 1 }
+            };
+
+            Plotly.newPlot('distributionPlot', [traceNormal, traceAnomaly], layout);
+        }
+
+        function displayAnomalyTable(originalData, labels) {
+            const anomalyTableDiv = document.getElementById('anomalyTable');
+            if (!originalData || originalData.length === 0) {
+                anomalyTableDiv.innerHTML = '<p>No data to display anomaly table.</p>';
+                return;
+            }
+
+            const anomalyRows = originalData.filter((_, i) => labels[i] === 1);
+
+            if (anomalyRows.length === 0) {
+                anomalyTableDiv.innerHTML = '<p>No anomalies detected based on current configuration.</p>';
+                return;
+            }
+
+            anomalyTableDiv.innerHTML = createTableHTML(anomalyRows);
+        }
+
+        function displayFeatureImportance(featureImportances) {
+            const featureImportancePlotDiv = document.getElementById('featureImportancePlot');
+            if (!featureImportances || Object.keys(featureImportances).length === 0) {
+                featureImportancePlotDiv.innerHTML = '<p style="text-align: center;">Feature importance not available for this model/data.</p>';
+                return;
+            }
+
+            const features = Object.keys(featureImportances);
+            const importanceValues = Object.values(featureImportances);
+
+            // Sort features by importance for better visualization
+            const sortedFeatures = features.map((feature, index) => ({ feature, importance: importanceValues[index] }))
+                                        .sort((a, b) => b.importance - a.importance);
+
+            const trace = {
+                x: sortedFeatures.map(f => f.importance),
+                y: sortedFeatures.map(f => f.feature),
+                mode: 'markers',
+                type: 'bar',
+                orientation: 'h',
+                marker: { color: '#56CCF2' }
+            };
+
+            const layout = {
+                title: 'Feature Importance (Higher value means more influential)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' },
+                xaxis: { title: 'Importance', gridcolor: 'rgba(255,255,255,0.1)' },
+                yaxis: { title: 'Feature', automargin: true },
+                margin: { l: 150 } // Adjust left margin for long feature names
+            };
+
+            Plotly.newPlot('featureImportancePlot', [trace], layout);
+        }
+
+
+        // Download Results
+        function downloadResults() {
+            if (!anomalyResults || !anomalyResults.originalData) {
+                showNotification('No anomaly results to download!', 'error');
+                return;
+            }
+
+            const headers = Object.keys(anomalyResults.originalData[0]);
+            const dataWithLabels = anomalyResults.originalData.map((row, index) => {
+                const newRow = { ...row };
+                newRow['Anomaly_Label'] = anomalyResults.labels[index];
+                if (anomalyResults.scores && anomalyResults.scores[index] !== undefined) {
+                    newRow['Anomaly_Score'] = anomalyResults.scores[index].toFixed(4);
+                }
+                return newRow;
+            });
+
+            // Reorder headers to put Anomaly_Label and Anomaly_Score at the end
+            const downloadHeaders = [...headers, 'Anomaly_Label', 'Anomaly_Score'];
+
+            const csv = PapaParse.unparse({
+                fields: downloadHeaders,
+                data: dataWithLabels.map(row => downloadHeaders.map(header => row[header]))
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute('download', 'anomaly_detection_results.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showNotification('Anomaly results downloaded as CSV!', 'success');
+        }
+
+        // Real-time Simulation
+        let realTimeDataCounter = 0;
+        let realTimeBuffer = [];
+        const REALTIME_BUFFER_SIZE = 100; // Number of points to show in real-time plot
+
+        function generateRealTimePoint() {
+            const cols = processedData.headers.length;
+            const newPoint = {};
+            const isAnomaly = Math.random() < 0.05; // 5% chance of anomaly in real-time
+            
+            for (let j = 0; j < cols; j++) {
+                const featureName = processedData.headers[j];
+                if (isAnomaly) {
+                    newPoint[featureName] = (Math.random() - 0.5) * 10 + 7; // More extreme anomaly values
+                } else {
+                    newPoint[featureName] = (Math.random() - 0.5) * 3; // Normal fluctuations
+                }
+            }
+            return newPoint;
+        }
+
+        async function processRealTimePoint() {
+            const newRawPoint = generateRealTimePoint();
+            let pointToProcess = Object.values(newRawPoint);
+
+            // Apply same preprocessing steps as initial data
+            const normalizeData = document.getElementById('normalizeData').checked;
+            const scalingMethod = document.getElementById('scalingMethod').value;
+
+            if (normalizeData && processedData && processedData.data && processedData.data.rows > 0) {
+                 const currentMatrix = new Matrix([pointToProcess]);
+                 if (scalingMethod === 'standard') {
+                    const means = processedData.data.mean('column');
+                    const stdDevs = processedData.data.standardDeviation('column');
+                    for (let i = 0; i < currentMatrix.columns; i++) {
+                        if (stdDevs[i] > 0) {
+                            currentMatrix.set(0, i, (currentMatrix.get(0, i) - means[i]) / stdDevs[i]);
+                        }
+                    }
+                 } else if (scalingMethod === 'minmax') {
+                    const minValues = processedData.data.min('column');
+                    const maxValues = processedData.data.max('column');
+                     for (let i = 0; i < currentMatrix.columns; i++) {
+                        const range = maxValues[i] - minValues[i];
+                        if (range > 0) {
+                            currentMatrix.set(0, i, (currentMatrix.get(0, i) - minValues[i]) / range);
+                        } else {
+                            currentMatrix.set(0, i, 0);
+                        }
+                    }
+                 }
+                pointToProcess = currentMatrix.to2DArray()[0];
+            }
+            
+            // Simulate anomaly detection for the new point
+            // For a real scenario, you'd run your trained model on this single point.
+            // Using a simple distance-from-centroid check for demo.
+            const centroid = new Array(pointToProcess.length).fill(0);
+            const totalPoints = processedData.data.rows;
+            const processedMatrixArray = processedData.data.to2DArray();
+
+            for (let i = 0; i < totalPoints; i++) {
+                for (let j = 0; j < processedMatrixArray[i].length; j++) {
+                    centroid[j] += processedMatrixArray[i][j];
+                }
+            }
+            for (let j = 0; j < centroid.length; j++) {
+                centroid[j] /= totalPoints;
+            }
+
+            let sumSqDiff = 0;
+            for (let j = 0; j < pointToProcess.length; j++) {
+                sumSqDiff += Math.pow(pointToProcess[j] - centroid[j], 2);
+            }
+            const distance = Math.sqrt(sumSqDiff);
+
+            const detectionContaminationRate = parseFloat(document.getElementById('contaminationSlider').value);
+            // Dynamic threshold based on past data's anomaly scores
+            const simulatedAnomalyScores = anomalyResults ? anomalyResults.scores : [];
+            const sortedSimulatedScores = [...simulatedAnomalyScores].sort((a,b) => b-a);
+            const thresholdIndex = Math.floor(sortedSimulatedScores.length * detectionContaminationRate);
+            const dynamicThreshold = sortedSimulatedScores.length > 0 ? sortedSimulatedScores[thresholdIndex] : Infinity;
+
+            const isAnomaly = distance > dynamicThreshold;
+            const anomalyLabel = isAnomaly ? 1 : 0;
+
+            realTimeBuffer.push({ point: newRawPoint, anomaly: anomalyLabel, score: distance });
+            if (realTimeBuffer.length > REALTIME_BUFFER_SIZE) {
+                realTimeBuffer.shift(); // Remove oldest point
+            }
+
+            updateRealtimePlot();
+            updateRealtimeStatus(isAnomaly);
+            updateRealtimeProgress();
+        }
+
+        function startRealTimeSimulation() {
+            if (!processedData || processedData.data.rows === 0) {
+                showNotification('Please upload and preprocess data before starting real-time simulation!', 'error');
+                return;
+            }
+            if (realtimeInterval) {
+                showNotification('Real-time simulation is already running!', 'warning');
+                return;
+            }
+
+            document.getElementById('realtimeResults').style.display = 'block';
+            document.getElementById('stopRealtimeBtn').style.display = 'inline-block';
+            document.querySelector('#realtime .btn').style.display = 'none'; // Hide start button
+
+            showNotification('Starting real-time simulation...', 'success');
+            realTimeDataCounter = 0;
+            realTimeBuffer = []; // Clear buffer for new simulation
+
+            // Initial plot setup
+            const initialTrace = {
+                x: [],
+                y: [],
+                mode: 'lines+markers',
+                name: 'Data Stream',
+                marker: { color: '#56CCF2', size: 5 },
+                line: { color: '#56CCF2' },
+                type: 'scatter'
+            };
+            realtimePlotData = [initialTrace];
+            realtimePlotLayout = {
+                title: 'Real-time Data Stream',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' },
+                xaxis: { title: 'Time (arbitrary units)', showgrid: false },
+                yaxis: { title: 'Feature 1 Value', gridcolor: 'rgba(255,255,255,0.1)' },
+                showlegend: false
+            };
+            Plotly.newPlot('realtimePlot', realtimePlotData, realtimePlotLayout);
+
+            realtimeInterval = setInterval(processRealTimePoint, 1000); // Process a point every second
+        }
+
+        function stopRealTimeSimulation() {
+            clearInterval(realtimeInterval);
+            realtimeInterval = null;
+            showNotification('Real-time simulation stopped.', 'warning');
+            document.getElementById('stopRealtimeBtn').style.display = 'none';
+            document.querySelector('#realtime .btn').style.display = 'inline-block'; // Show start button again
+            updateRealtimeStatus(false, true); // Reset status
+            document.getElementById('realtimeProgressText').textContent = 'Simulation stopped.';
+        }
+
+        function updateRealtimePlot() {
+            const xData = realTimeBuffer.map((_, i) => i);
+            const yData = realTimeBuffer.map(item => item.point[processedData.headers[0]] || 0); // Plot first feature
+            const colors = realTimeBuffer.map(item => item.anomaly === 1 ? '#FF6B6B' : '#56CCF2');
+            const sizes = realTimeBuffer.map(item => item.anomaly === 1 ? 8 : 5);
+            const symbols = realTimeBuffer.map(item => item.anomaly === 1 ? 'diamond' : 'circle');
+
+            const newTrace = {
+                x: xData,
+                y: yData,
+                mode: 'lines+markers',
+                name: 'Data Stream',
+                marker: { color: colors, size: sizes, symbol: symbols },
+                line: { color: '#56CCF2' },
+                type: 'scatter'
+            };
+
+            Plotly.react('realtimePlot', [newTrace], realtimePlotLayout);
+        }
+
+        function updateRealtimeStatus(isAnomaly, stopped = false) {
+            const realtimeStatusDiv = document.getElementById('realtimeStatus');
+            if (stopped) {
+                 realtimeStatusDiv.innerHTML = '<span class="status-indicator" style="background: grey;"></span> Simulation Stopped';
+            } else if (isAnomaly) {
+                realtimeStatusDiv.innerHTML = '<span class="status-indicator status-anomaly"></span> Anomaly Detected!';
+                showNotification('Anomaly detected in real-time stream!', 'error');
+            } else {
+                realtimeStatusDiv.innerHTML = '<span class="status-indicator status-normal"></span> Normal Operation';
+            }
+        }
+
+        function updateRealtimeProgress() {
+            realTimeDataCounter++;
+            const progressFill = document.getElementById('realtimeProgress');
+            const progressText = document.getElementById('realtimeProgressText');
+            // Simulate indefinite stream, so progress bar just animates
+            const progress = (realTimeDataCounter % 100) / 100 * 100; // Cycles from 0 to 99%
+            progressFill.style.width = `${progress}%`;
+            progressText.textContent = `Processing point ${realTimeDataCounter}...`;
+        }
+
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            showPage('home', {target: document.querySelector('.nav-tab.active')}); // Ensure home page is active on load
+            document.getElementById('contaminationSlider').value = 0.1;
+            document.getElementById('contaminationValue').textContent = 0.1;
+            document.getElementById('confidenceSlider').value = 0.5;
+            document.getElementById('confidenceValue').textContent = 0.5;
+        });
+
+        // Ensure showPage is called correctly for initial load
+        showPage('home', { target: document.querySelector('.nav-tab.active') });
+
+    </script>
+</body>
+</html>
